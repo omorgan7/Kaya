@@ -1,0 +1,33 @@
+{
+  "name": "kaya",
+  "version": "1.0.0",
+  "description": "Parses Dota 2 replays.",
+  "main": "dota2_parser.js",
+  "scripts": {
+    "proto_build": "sh definitions_proto/update_proto.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Owen Morgan",
+  "license": "ISC",
+  "dependencies": {
+    "google-protobuf": "^3.8.0-rc.1",
+    "snappy": "^6.2.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omorgan7/Kaya.git"
+  },
+  "keywords": [
+    "dota2",
+    "replay",
+    "parser",
+    "dem",
+    "valve",
+    "source2"
+  ],
+  "bugs": {
+    "url": "https://github.com/omorgan7/Kaya/issues"
+  },
+  "homepage": "https://github.com/omorgan7/Kaya#readme"
+}
