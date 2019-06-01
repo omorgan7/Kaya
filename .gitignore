@@ -1,4 +1,5 @@
 .DS_Store
+.vscode
 *.txt
 definitions_proto/*.proto
 generated_proto/*.js
