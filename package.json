@@ -5,7 +5,7 @@
   "main": "dota2_parser.js",
   "scripts": {
     "proto_build": "sh definitions_proto/update_proto.sh",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "author": "Owen Morgan",
   "license": "ISC",

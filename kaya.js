@@ -1,115 +1,10 @@
 'use strict'
 
-class VariableByteReader {
-
-    constructor(buffer, index) {
-        this.buf = buffer
-        this.index = index
-        this.length = buffer.byteLength
-    }
-    
-    seek = (byAmount) => {
-        this.index += byAmount
-    }
-
-    byte = () => {
-        return this.buf[this.index++]
-    }
-
-    variableInt32 = () => {
-        let result = 0
-        let  s = 0
-        while (true) {
-            let b = this.byte()
-            result |= (b & 0x7F) << s
-            s += 7
-            if (((b & 0x80) == 0) || (s == 35)) {
-                break
-            }
-        }
-
-        return result
-    }
-}
-
-class VariableBitReader extends VariableByteReader {
-
-    constructor(buffer, index) {
-        super(buffer, index)
-        this.bitValue = 0n
-        this.bitCount = 0
-    }
-    
-    bits = (n) => {
-        while (this.bitCount < n) {
-            this.bitValue |= BigInt(this.nextByte() << this.bitCount)
-		    this.bitCount += 8
-        }
-
-        let val = this.bitValue & BigInt(((1 << n) - 1))
-        this.bitValue >>= BigInt(n)
-        this.bitCount -= n
-
-        return Number(val)
-    }
-
-    nextByte = () => {
-        return this.buf[this.index++]
-    }
-
-    byte = () => {
-        if (this.bitCount == 0) {
-            return this.nextByte()
-        }
-        else {
-            return this.bits(8)
-        }
-    }
-
-    bytes = (n) => {
-        if (this.bitCount == 0) {
-            let buf = Buffer.from(this.buf.slice(this.index, this.index + n))
-            this.seek(n)
-            return buf
-        }
-
-        let out = Buffer.alloc(n)
-        for (let i = 0; i < n; i++) {
-            out[i] = this.bits(8)
-        }
-
-        return out
-    }
-
-    variableBits = () => {
-
-        // copied from dotabuff/manta
-        let ret = this.bits(6)
-        switch (ret & 0x30) {
-            case 16:
-                ret = (ret & 15) | (this.bits(4) << 4)
-                break
-            case 32:
-                ret = (ret & 15) | (this.bits(8) << 4)
-                break
-            case 48:
-                ret = (ret & 15) | (this.bits(28) << 4)
-                break
-            }
-        return ret
-    }
-}
-
-const protobuf = require('google-protobuf')
+const bytereader = require('./reader')
 const snappy = require('snappy')
 const fs = require('fs')
-const messages = require('./generated_proto/dota_gcmessages_common_pb')
 const demo = require('./generated_proto/demo_pb')
-const demoNetwork = require('./generated_proto/networkbasetypes_pb')
-const gcmessages = require('./generated_proto/dota_gcmessages_msgid_pb')
 const usermessages = require('./generated_proto/dota_usermessages_pb')
-const clientmessages = require('./generated_proto/dota_clientmessages_pb')
-const netmessages = require('./generated_proto/netmessages_pb')
 const metadata = require('./generated_proto/dota_match_metadata_pb')
 const dotashared = require('./generated_proto/dota_shared_enums_pb')
 
@@ -161,7 +56,7 @@ exports.parseReplaySync = function(replayFilePath) {
 
     function readDemoPacket(data) {
 
-        let reader = new VariableBitReader(Buffer.from(data), 0)
+        let reader = new bytereader.VariableBitReader(Buffer.from(data))
 
         // a packet can actually contain many subpackets.
         while (reader.length - reader.index > 0) {
@@ -265,7 +160,7 @@ exports.parseReplaySync = function(replayFilePath) {
         throw "Not a dota 2 replay file."
     }
 
-    let reader = new VariableByteReader(replay, 16)
+    let reader = new bytereader.VariableByteReader(replay, 16)
     var dotaGamePlayers = []
 
     try {
