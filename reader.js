@@ -37,21 +37,21 @@ class VariableBitReader extends VariableByteReader {
 
     constructor(buffer, index = 0) {
         super(buffer, index)
-        this.bitValue = 0n
+        this.bitValue = 0
         this.bitCount = 0
     }
     
     bits = (n) => {
         while (this.bitCount < n) {
-            this.bitValue |= BigInt(this.nextByte() << this.bitCount)
+            this.bitValue |= this.nextByte() << this.bitCount
 		    this.bitCount += 8
         }
 
-        let val = this.bitValue & BigInt(((1 << n) - 1))
-        this.bitValue >>= BigInt(n)
+        let val = this.bitValue & ((1 << n) - 1)
+        this.bitValue >>= n
         this.bitCount -= n
 
-        return Number(val)
+        return val
     }
 
     nextByte = () => {
